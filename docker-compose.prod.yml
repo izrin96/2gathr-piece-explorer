@@ -1,0 +1,98 @@
+# Minimal prod stack for the website: the container + the two Postgres DBs it
+# reads (app `main`, and the indexer DB read-only) behind pgbouncer, matching
+# the pooling setup docker-compose.yml uses in dev.
+#
+# Already have managed/external Postgres instead? Delete the postgres*/
+# pgbouncer* services below and point DATABASE_URL/INDEXER_DATABASE_URL on the
+# `website` service directly at them.
+#
+# Usage:
+#   cp .env.prod.example .env.prod   # fill in real passwords
+#   docker compose --env-file .env.prod -f docker-compose.prod.yml up -d
+
+services:
+  postgres:
+    image: postgres:18
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=main
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - DB_USER=postgres
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=postgres
+      - DB_NAME=main
+      - POOL_MODE=transaction
+      - AUTH_TYPE=scram-sha-256
+      - MAX_CLIENT_CONN=300
+      - DEFAULT_POOL_SIZE=20
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost"]
+
+  postgres-indexer:
+    image: postgres:18
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${INDEXER_DB_PASSWORD}
+      - POSTGRES_DB=indexer
+    volumes:
+      - postgres-indexer-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d indexer -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgbouncer-indexer:
+    image: edoburu/pgbouncer:latest
+    restart: always
+    depends_on:
+      postgres-indexer:
+        condition: service_healthy
+    environment:
+      - DB_USER=postgres
+      - DB_PASSWORD=${INDEXER_DB_PASSWORD}
+      - DB_HOST=postgres-indexer
+      - DB_NAME=indexer
+      - POOL_MODE=transaction
+      - AUTH_TYPE=scram-sha-256
+      - MAX_CLIENT_CONN=300
+      - DEFAULT_POOL_SIZE=20
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost"]
+
+  website:
+    image: ghcr.io/izrin96/2gathr-piece-explorer-website:latest
+    platform: linux/amd64
+    restart: always
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      pgbouncer-indexer:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://postgres:${DB_PASSWORD}@pgbouncer:5432/main
+      - INDEXER_DATABASE_URL=postgres://postgres:${INDEXER_DB_PASSWORD}@pgbouncer-indexer:5432/indexer
+
+volumes:
+  postgres-data:
+  postgres-indexer-data:
