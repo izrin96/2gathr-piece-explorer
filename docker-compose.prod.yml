@@ -1,13 +1,15 @@
-# Minimal prod stack for the website: the container + the two Postgres DBs it
-# reads (app `main`, and the indexer DB read-only) behind pgbouncer, matching
-# the pooling setup docker-compose.yml uses in dev.
+# Full prod stack: website + worker + indexer (processor), and the two
+# Postgres DBs they read/write behind pgbouncer, matching the pooling setup
+# docker-compose.yml uses in dev.
 #
 # Already have managed/external Postgres instead? Delete the postgres*/
-# pgbouncer* services below and point DATABASE_URL/INDEXER_DATABASE_URL on the
-# `website` service directly at them.
+# pgbouncer* services below and point the DB env vars on website/worker/
+# indexer directly at them. Note `indexer` connects directly to Postgres
+# (never pgbouncer) — Subsquid runs long/DDL transactions that transaction
+# pooling breaks; see AGENTS.md gotchas.
 #
 # Usage:
-#   cp .env.prod.example .env.prod   # fill in real passwords
+#   cp .env.prod.example .env.prod   # fill in real passwords + RPC config
 #   docker compose --env-file .env.prod -f docker-compose.prod.yml up -d
 
 services:
@@ -92,6 +94,40 @@ services:
     environment:
       - DATABASE_URL=postgres://postgres:${DB_PASSWORD}@pgbouncer:5432/main
       - INDEXER_DATABASE_URL=postgres://postgres:${INDEXER_DB_PASSWORD}@pgbouncer-indexer:5432/indexer
+
+  # Cron-scheduled TopPort enrichment + rollup recompute. No exposed port.
+  worker:
+    image: ghcr.io/izrin96/2gathr-piece-explorer-worker:latest
+    platform: linux/amd64
+    restart: always
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+      pgbouncer-indexer:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgres://postgres:${DB_PASSWORD}@pgbouncer:5432/main
+      - INDEXER_DATABASE_URL=postgres://postgres:${INDEXER_DB_PASSWORD}@pgbouncer-indexer:5432/indexer
+      - TOPPORT_BASE_URL=${TOPPORT_BASE_URL:-https://api.topport.io}
+
+  # Subsquid processor: applies pending migrations then indexes Ruby + Piece
+  # Transfer events from Titan. Connects DIRECTLY to postgres-indexer (never
+  # pgbouncer-indexer) — see the note at the top of this file.
+  indexer:
+    image: ghcr.io/izrin96/2gathr-piece-explorer-indexer:latest
+    platform: linux/amd64
+    restart: always
+    depends_on:
+      postgres-indexer:
+        condition: service_healthy
+    environment:
+      - DB_URL=postgres://postgres:${INDEXER_DB_PASSWORD}@postgres-indexer:5432/indexer
+      - INDEXER_RPC_ENDPOINT=${INDEXER_RPC_ENDPOINT}
+      - INDEXER_RPC_RATE_LIMIT=${INDEXER_RPC_RATE_LIMIT:-5}
+      - INDEXER_RPC_FINALITY=${INDEXER_RPC_FINALITY:-10}
+      - INDEXER_START_BLOCK=${INDEXER_START_BLOCK:-0}
+      - INDEXER_GETLOGS_RANGE=${INDEXER_GETLOGS_RANGE:-2048}
+      - INDEXER_RUBY_ADDRESS=${INDEXER_RUBY_ADDRESS}
 
 volumes:
   postgres-data:

@@ -1,5 +1,9 @@
 # Build from the repo root: docker build -f apps/indexer/Dockerfile .
 FROM node:24-slim AS base
+# Optional native deps pulled in transitively (bufferutil/utf-8-validate via
+# ws) compile from source on install — need a C++ toolchain or install fails.
+RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ \
+  && rm -rf /var/lib/apt/lists/*
 RUN npm install -g pnpm@11.10.0
 WORKDIR /repo
 
