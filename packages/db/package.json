@@ -24,13 +24,13 @@
   },
   "dependencies": {
     "@repo/lib": "workspace:*",
+    "@repo/tsconfig": "workspace:*",
     "drizzle-orm": "catalog:",
     "pg": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@repo/lint": "workspace:*",
-    "@repo/tsconfig": "workspace:*",
     "@types/pg": "catalog:dev",
     "drizzle-kit": "catalog:dev",
     "typescript": "catalog:dev",

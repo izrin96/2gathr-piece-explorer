@@ -19,6 +19,7 @@
     "@repo/db": "workspace:*",
     "@repo/lib": "workspace:*",
     "croner": "catalog:",
+    "drizzle-kit": "catalog:dev",
     "drizzle-orm": "catalog:",
     "tsx": "catalog:dev",
     "zod": "catalog:"

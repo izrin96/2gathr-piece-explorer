@@ -25,7 +25,8 @@ Run from repo root. Turborepo fans out to workspaces.
 | Format              | `pnpm format` (oxfmt) · check: `pnpm exec oxfmt --check .`                          |
 | Test                | `pnpm test` (Vitest) · one pkg: `pnpm --filter @repo/lib test`                      |
 | Dev stack up        | `docker compose up -d postgres postgres-indexer valkey pgbouncer pgbouncer-indexer` |
-| DB push (app)       | `pnpm --filter @repo/db db:push` (needs `.env`; see gotchas)                        |
+| DB push (app, dev)  | `pnpm --filter @repo/db db:push` (needs `.env`; see gotchas)                        |
+| DB generate (prod)  | `pnpm --filter @repo/db db:generate` (before deploying a schema change; see below)  |
 | DB studio           | `pnpm --filter @repo/db db:studio`                                                  |
 | Indexer run         | `pnpm --filter indexer process` (RPC backfill vs Titan; ~1h50m for full history)    |
 | Indexer codegen     | `pnpm --filter indexer codegen` (TypeORM models from `schema.graphql`)              |
@@ -107,3 +108,16 @@ excluded mint's Ruby cost dangles unconsumed. Infinite-scroll via TanStack Query
 sentinel — `hooks/use-load-more-on-scroll.ts`, shared with the serials reveal above); a type
 filter (`?type=piece|ruby`) lives in the URL. `orpc/router.ts` is now just the merge point —
 procedures live in `orpc/routers/{shared,pieces,holders}.ts`. Search, auth, i18n deferred.
+
+**App DB deploys**: hybrid workflow — dev keeps using `db:push` (fast, no migration files) against
+`packages/db/src/schema.ts`. Before deploying a schema change, run `pnpm --filter @repo/db
+db:generate` to produce the SQL under `packages/db/migrations/` and commit it; the `worker`
+container applies pending migrations on startup (`apps/worker/Dockerfile` `CMD`, against
+`MIGRATE_DATABASE_URL` — direct Postgres, never pgbouncer, same DDL-under-pooling reason as
+`db:push`) before its cron jobs start. `drizzle-kit` is a dependency of `apps/worker` itself, not
+`@repo/db` — pnpm's per-package `node_modules` means `@repo/db`'s own `db:migrate` script can't see
+a binary installed elsewhere, and adding it to `@repo/db` would drag drizzle-kit's native-dep
+weight into the website/indexer images too. Likewise `@repo/tsconfig` had to move from `@repo/db`'s
+devDependencies to dependencies — drizzle-kit resolves `packages/db/tsconfig.json`'s `extends`
+chain at runtime, and `--prod` installs strip devDependencies (including workspace-linked ones)
+everywhere, `@repo/db` included.

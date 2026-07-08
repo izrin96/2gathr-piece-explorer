@@ -96,17 +96,23 @@ services:
       - INDEXER_DATABASE_URL=postgres://postgres:${INDEXER_DB_PASSWORD}@pgbouncer-indexer:5432/indexer
 
   # Cron-scheduled TopPort enrichment + rollup recompute. No exposed port.
+  # Also applies pending app-DB migrations on start (see MIGRATE_DATABASE_URL).
   worker:
     image: ghcr.io/izrin96/2gathr-piece-explorer-worker:latest
     platform: linux/amd64
     restart: always
     depends_on:
+      postgres:
+        condition: service_healthy
       pgbouncer:
         condition: service_healthy
       pgbouncer-indexer:
         condition: service_healthy
     environment:
       - DATABASE_URL=postgres://postgres:${DB_PASSWORD}@pgbouncer:5432/main
+      # Migrations run DDL — direct to Postgres, never through pgbouncer's
+      # transaction pooling (same reason indexer's DB_URL bypasses it).
+      - MIGRATE_DATABASE_URL=postgres://postgres:${DB_PASSWORD}@postgres:5432/main
       - INDEXER_DATABASE_URL=postgres://postgres:${INDEXER_DB_PASSWORD}@pgbouncer-indexer:5432/indexer
       - TOPPORT_BASE_URL=${TOPPORT_BASE_URL:-https://api.topport.io}
 

@@ -33,9 +33,12 @@ pnpm --filter @repo/db db:push
 pnpm dev
 ```
 
-The app DB (`packages/db`) uses `drizzle-kit push` (schema-diff push, no tracked migration
-files) rather than `generate`/`migrate` — `db:push` above is the only step needed to sync a local
-Postgres to `packages/db/src/schema.ts`. Re-run it after pulling schema changes.
+The app DB (`packages/db`) uses a hybrid workflow: **dev** syncs a local Postgres straight from
+`packages/db/src/schema.ts` via `db:push` (no migration files, fast iteration) — `db:push` above
+is the only step needed locally, re-run it after pulling schema changes. **Prod** applies a
+generated migration instead: run `pnpm --filter @repo/db db:generate` before deploying a schema
+change to produce the committed SQL in `packages/db/migrations/`, which the `worker` container
+applies automatically on startup (see `apps/worker/Dockerfile`) before its cron jobs start.
 
 ## Common commands
 

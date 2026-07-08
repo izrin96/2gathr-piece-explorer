@@ -248,6 +248,9 @@ importers:
       croner:
         specifier: 'catalog:'
         version: 9.1.0
+      drizzle-kit:
+        specifier: catalog:dev
+        version: 1.0.0-rc.4-ca0f029
       drizzle-orm:
         specifier: 'catalog:'
         version: 1.0.0-rc.4-5d5b77c(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3)
@@ -304,6 +307,9 @@ importers:
       '@repo/lib':
         specifier: workspace:*
         version: link:../lib
+      '@repo/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       drizzle-orm:
         specifier: 'catalog:'
         version: 1.0.0-rc.4-5d5b77c(@types/pg@8.20.0)(pg@8.22.0)(zod@4.4.3)
@@ -317,9 +323,6 @@ importers:
       '@repo/lint':
         specifier: workspace:*
         version: link:../lint
-      '@repo/tsconfig':
-        specifier: workspace:*
-        version: link:../tsconfig
       '@types/pg':
         specifier: catalog:dev
         version: 8.20.0
