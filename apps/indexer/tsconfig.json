@@ -1,0 +1,28 @@
+{
+  "extends": "@repo/tsconfig/tsconfig.node.json",
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", ".turbo", "lib"],
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": true,
+    // squid-typeorm-codegen output (src/model/generated/**) is vendor-generated and fails
+    // under two strict base-tsconfig flags, so both are relaxed package-wide (tsc has no
+    // per-directory scoping, and the generated files must not be hand-edited):
+    //   - isolatedModules: TS1272 — relation fields are value-imported entity classes used
+    //     only as types, which isolatedModules rejects when combined with
+    //     emitDecoratorMetadata (needed for TypeORM's reflection-based column typing).
+    //   - noUnusedLocals: codegen always emits an unused `Column` import in every model file.
+    // isolatedModules: false is safe here because this package builds via full-program
+    // `tsc -p tsconfig.build.json`, not a per-file transpiler (swc/esbuild/babel), so there's
+    // no risk of the const-enum/re-export ambiguities isolatedModules normally guards against.
+    // Unused-vars for HAND-WRITTEN indexer code (env.ts, abi/*, and the upcoming
+    // parser.ts/processor.ts/main.ts) is instead enforced via oxlint's `no-unused-vars`,
+    // re-enabled in oxlint.config.mts (the repo-wide base config turns it off) and scoped
+    // away from src/model/generated/** by that file's ignorePatterns.
+    "isolatedModules": false,
+    "noUnusedLocals": false
+  }
+}

@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.output/
+.nitro/
+.turbo/
+*.tsbuildinfo
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Framework caches
+.vite/
+.tanstack/
+src/paraglide/
+src/generated/
+
+# Subsquid / indexer
+apps/indexer/lib/
+
+# Logs / OS
+*.log
+.DS_Store
+
+# Editor
+.idea/

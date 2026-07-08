@@ -1,0 +1,4 @@
+src/indexer/*.sql
+src/indexer/meta/
+src/indexer/relations.ts
+src/indexer/[0-9]*_*/

@@ -1,0 +1,33 @@
+{
+  "name": "worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "dotenvx run -f ../../.env -- tsx watch src/index.ts",
+    "start": "dotenvx run -f ../../.env -- tsx src/index.ts",
+    "enrich:once": "dotenvx run -f ../../.env -- tsx src/run-once.ts enrich",
+    "rollups:once": "dotenvx run -f ../../.env -- tsx src/run-once.ts rollups",
+    "lint": "oxlint --type-aware",
+    "lint:fix": "oxlint --type-aware --fix",
+    "typecheck": "tsc --noEmit",
+    "format": "oxfmt .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@repo/2gathr": "workspace:*",
+    "@repo/db": "workspace:*",
+    "@repo/lib": "workspace:*",
+    "croner": "catalog:",
+    "drizzle-orm": "catalog:",
+    "tsx": "catalog:dev",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@dotenvx/dotenvx": "catalog:dev",
+    "@repo/lint": "workspace:*",
+    "@repo/tsconfig": "workspace:*",
+    "typescript": "catalog:dev",
+    "vitest": "catalog:dev"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "indexer",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "rm -rf lib && tsc -p tsconfig.build.json",
+    "codegen": "squid-typeorm-codegen",
+    "migration:generate": "dotenvx run -f ../../.env -- squid-typeorm-migration generate",
+    "migration:apply": "dotenvx run -f ../../.env -- squid-typeorm-migration apply",
+    "process": "dotenvx run -f ../../.env -- node lib/main.js",
+    "start": "node lib/main.js",
+    "lint": "oxlint --type-aware --config ./oxlint.config.mts",
+    "lint:fix": "oxlint --type-aware --fix --config ./oxlint.config.mts",
+    "typecheck": "tsc --pretty --noEmit",
+    "format": "oxfmt .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@subsquid/evm-abi": "^1.0.0",
+    "@subsquid/evm-codec": "^1.0.0",
+    "@subsquid/evm-processor": "^1.30.1",
+    "@subsquid/typeorm-migration": "^1.3.1",
+    "@subsquid/typeorm-store": "^1.9.1",
+    "pg": "catalog:",
+    "typeorm": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@dotenvx/dotenvx": "catalog:dev",
+    "@repo/lint": "workspace:*",
+    "@repo/tsconfig": "workspace:*",
+    "@subsquid/typeorm-codegen": "^2.2.0",
+    "@types/pg": "catalog:dev",
+    "turbo": "catalog:dev",
+    "typescript": "catalog:dev",
+    "vitest": "catalog:dev"
+  }
+}

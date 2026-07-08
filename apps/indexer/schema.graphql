@@ -1,0 +1,54 @@
+type PieceCollection @entity {
+  "contract address (lowercase)"
+  id: ID!
+  "on-chain name() — the edition label, verbatim"
+  edition: String!
+  "on-chain symbol()"
+  symbol: String!
+  firstSeenBlock: Int! @index
+  "count of live (non-burned) tokens, maintained incrementally"
+  totalSupply: Int!
+  tokens: [PieceToken!] @derivedFrom(field: "collection")
+  transfers: [PieceTransfer!] @derivedFrom(field: "collection")
+}
+
+type PieceToken @entity {
+  "`${contractAddress}-${tokenId}`"
+  id: ID!
+  collection: PieceCollection!
+  contractAddress: String! @index
+  "decimal string token id"
+  tokenId: String!
+  "on-chain serial number (= tokenId as an integer)"
+  serial: BigInt! @index
+  owner: String! @index
+  mintedAt: DateTime!
+  lastTransferAt: DateTime! @index
+  lastTransferBlock: Int!
+}
+
+type PieceTransfer @entity {
+  "`${blockNumber}-${logIndex}`"
+  id: ID!
+  collection: PieceCollection!
+  contractAddress: String! @index
+  tokenId: String! @index
+  from: String! @index
+  to: String! @index
+  timestamp: DateTime! @index
+  blockNumber: Int! @index
+  logIndex: Int!
+  hash: String! @index
+}
+
+type RubyTransfer @entity {
+  "`${blockNumber}-${logIndex}`"
+  id: ID!
+  from: String! @index
+  to: String! @index
+  value: BigInt!
+  timestamp: DateTime! @index
+  blockNumber: Int! @index
+  logIndex: Int!
+  hash: String! @index
+}

@@ -1,0 +1,30 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+allowBuilds:
+  "@apollo/protobufjs": true
+  bufferutil: true
+  es5-ext: true
+  esbuild: true
+  sharp: true
+  utf-8-validate: true
+
+catalog:
+  croner: ^9.0.0
+  drizzle-orm: ^1.0.0-rc.4-5d5b77c
+  ofetch: ^1.5.1
+  pg: ^8.22.0
+  typeorm: ^0.3.30
+  zod: ^4.4.3
+
+catalogs:
+  dev:
+    "@dotenvx/dotenvx": ^1.51.0
+    "@types/node": ^26.0.1
+    "@types/pg": ^8.20.0
+    drizzle-kit: ^1.0.0-rc.4-5d5b77c
+    turbo: ^2.10.2
+    tsx: ^4.20.0
+    typescript: ^7.0.1-rc
+    vite: ^8.1.3
+    vitest: ^3.2.4

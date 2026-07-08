@@ -1,0 +1,16 @@
+.git
+node_modules
+**/node_modules
+**/.turbo
+**/*.tsbuildinfo
+apps/indexer/lib
+apps/website/.output
+apps/website/.nitro
+apps/website/.tanstack
+apps/website/dist
+.env
+.env.*
+!.env.example
+docs
+**/*.log
+.DS_Store

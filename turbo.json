@@ -1,0 +1,27 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "ui": "tui",
+  "globalDependencies": ["packages/lint/oxlint.config.ts", "oxfmt.config.ts"],
+  "tasks": {
+    "dev": { "cache": false, "persistent": true },
+    "build": { "dependsOn": ["^build"], "outputs": ["dist/**", ".output/**", "lib/**"] },
+    "start": { "cache": false, "persistent": true },
+    "lint": {
+      "dependsOn": ["^lint"],
+      "inputs": ["$TURBO_DEFAULT$", "oxlint.config.ts"],
+      "outputs": []
+    },
+    "lint:fix": {
+      "inputs": ["$TURBO_DEFAULT$", "oxlint.config.ts"],
+      "outputs": ["**/*.{ts,tsx,js,jsx}"],
+      "cache": false
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"],
+      "inputs": ["$TURBO_DEFAULT$", "tsconfig.json"],
+      "outputs": []
+    },
+    "test": { "dependsOn": ["^build"], "outputs": [] },
+    "format": { "inputs": ["$TURBO_DEFAULT$", "oxfmt.config.ts"], "outputs": [], "cache": false }
+  }
+}
