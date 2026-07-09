@@ -1,5 +1,5 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, notFound, useRouter } from "@tanstack/react-router";
 import { ChevronLeftIcon } from "lucide-react";
 
 import { CollectStatusCard } from "@/components/holder/collect-status-card";
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/address/$address/members/$member")({
 });
 
 function HolderMemberDetail() {
+  const router = useRouter();
   const { address, member } = Route.useParams();
   const { data: designs } = useSuspenseQuery(orpc.pieces.list.queryOptions());
   const { data: summary } = useSuspenseQuery(
@@ -33,14 +34,17 @@ function HolderMemberDetail() {
 
   return (
     <section className="space-y-6">
-      <Link
-        to="/address/$address/members"
-        params={{ address }}
+      <button
+        type="button"
+        onClick={() => {
+          if (router.history.canGoBack()) router.history.back();
+          else router.navigate({ to: "/address/$address/members", params: { address } });
+        }}
         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
       >
         <ChevronLeftIcon className="size-4" />
         Progress
-      </Link>
+      </button>
       <div className="space-y-2">
         <h1 className="text-xl font-semibold">{progress.member}</h1>
         <Progress value={progress.percent}>
