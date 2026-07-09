@@ -38,7 +38,12 @@ function HolderLayout() {
 
   if (!summary) return null; // loader already threw notFound
 
-  const activeTab = matchRoute({ to: "/address/$address/activity" }) ? "activity" : "pieces";
+  const activeTab = matchRoute({ to: "/address/$address/activity" })
+    ? "activity"
+    : matchRoute({ to: "/address/$address/book" }) ||
+        matchRoute({ to: "/address/$address/book/$bookId" })
+      ? "book"
+      : "pieces";
 
   return (
     <div className="space-y-8">
@@ -63,7 +68,12 @@ function HolderLayout() {
         value={activeTab}
         onValueChange={(v) =>
           void navigate({
-            to: v === "activity" ? "/address/$address/activity" : "/address/$address",
+            to:
+              v === "activity"
+                ? "/address/$address/activity"
+                : v === "book"
+                  ? "/address/$address/book"
+                  : "/address/$address",
             params: { address },
             resetScroll: false,
           })
@@ -72,6 +82,7 @@ function HolderLayout() {
         <TabsList variant="line">
           <TabsTrigger value="pieces">Pieces</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
+          <TabsTrigger value="book">Book</TabsTrigger>
         </TabsList>
       </Tabs>
 
