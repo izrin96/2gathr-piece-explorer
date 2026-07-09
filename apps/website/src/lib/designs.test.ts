@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatDesignName, joinDesigns } from "./designs";
+import { joinDesigns } from "./designs";
 
 const collection = {
   id: "0xAbCd000000000000000000000000000000000001",
@@ -12,6 +12,7 @@ const collection = {
 
 const meta = {
   contractAddress: "0xabcd000000000000000000000000000000000001",
+  name: "2026 ARIN DAY",
   member: "Bome",
   designNumber: 5,
   edition: "2025 Season 1",
@@ -25,19 +26,12 @@ const meta = {
   isHidden: false,
 };
 
-describe("formatDesignName", () => {
-  it("pads the design number to three digits", () => {
-    expect(formatDesignName("Bome", 5)).toBe("Bome #005");
-    expect(formatDesignName("Seohyeon", 123)).toBe("Seohyeon #123");
-  });
-});
-
 describe("joinDesigns", () => {
   it("joins collection and meta by normalized address", () => {
     const [d] = joinDesigns([collection], [meta]);
     expect(d).toMatchObject({
       contractAddress: "0xabcd000000000000000000000000000000000001",
-      name: "Bome #005",
+      name: "2026 ARIN DAY",
       member: "Bome",
       pieceClass: "S",
       edition: "2025 Season 1",
@@ -50,9 +44,8 @@ describe("joinDesigns", () => {
     expect(joinDesigns([collection], [])).toEqual([]);
   });
 
-  it("treats empty-string member as null (falls back to plain name)", () => {
-    const [d] = joinDesigns([collection], [{ ...meta, member: "" }]);
-    expect(d?.member).toBeNull();
+  it("falls back to edition · symbol when the TopPort name is missing", () => {
+    const [d] = joinDesigns([collection], [{ ...meta, name: null }]);
     expect(d?.name).toBe("2025 Season 1 · AtHeart");
   });
 

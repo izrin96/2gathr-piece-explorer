@@ -1,8 +1,8 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "ec53f31f-baad-4305-a71f-f0f333b96e3d",
-  "prevIds": ["00000000-0000-0000-0000-000000000000"],
+  "id": "a801b468-34a3-48cf-8c57-487e8ffe0a35",
+  "prevIds": ["ec53f31f-baad-4305-a71f-f0f333b96e3d"],
   "ddl": [
     {
       "isRlsEnabled": false,
@@ -96,6 +96,19 @@
       "generated": null,
       "identity": null,
       "name": "contract_address",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "piece_design_meta"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
       "entityType": "columns",
       "schema": "public",
       "table": "piece_design_meta"

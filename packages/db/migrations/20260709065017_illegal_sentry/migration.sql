@@ -1,0 +1,1 @@
+ALTER TABLE "piece_design_meta" ADD COLUMN "name" text;

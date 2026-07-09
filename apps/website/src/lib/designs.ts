@@ -13,6 +13,7 @@ export interface CollectionRow {
 
 export interface MetaRow {
   contractAddress: string;
+  name: string | null;
   member: string | null;
   designNumber: number | null;
   edition: string;
@@ -27,10 +28,6 @@ export interface MetaRow {
 }
 
 const PIECE_CLASSES = new Set<string>(["S", "A", "B"]);
-
-export function formatDesignName(member: string, designNumber: number): string {
-  return `${member} #${String(designNumber).padStart(3, "0")}`;
-}
 
 // The indexer DB and app DB cannot be SQL-joined — join in code by address.
 // Collections with no `piece_design_meta` row are the earliest test contracts
@@ -52,10 +49,7 @@ export function joinDesigns(collections: CollectionRow[], metas: MetaRow[]): Des
 
     designs.push({
       contractAddress: address,
-      name:
-        member && meta.designNumber != null
-          ? formatDesignName(member, meta.designNumber)
-          : `${c.edition} · ${c.symbol}`,
+      name: meta.name?.trim() ? meta.name : `${c.edition} · ${c.symbol}`,
       member,
       designNumber: meta.designNumber ?? null,
       pieceClass,

@@ -7,6 +7,7 @@ const TITAN_CHAIN_ID = 84358;
 
 export interface ParsedTopportDesign {
   contractAddress: string | null;
+  name: string | null;
   member: string | null;
   designNumber: number | null;
   rarity: number;
@@ -58,6 +59,7 @@ export function parseTopportBox(box: TopportBox, fallbackEdition: string): Parse
 
   return {
     contractAddress: box.boxContractAddress ? box.boxContractAddress.toLowerCase() : null,
+    name: name || null,
     member: member ? normalizeMember(member) : null,
     designNumber: parsed.designNumber,
     rarity,

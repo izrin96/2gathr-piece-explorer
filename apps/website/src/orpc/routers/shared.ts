@@ -6,6 +6,7 @@ import type { CollectionRow, MetaRow } from "@/lib/designs";
 export function toMetaRow(m: typeof schema.pieceDesignMeta.$inferSelect): MetaRow {
   return {
     contractAddress: m.contractAddress,
+    name: m.name,
     member: m.member,
     designNumber: m.designNumber,
     edition: m.edition,

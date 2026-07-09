@@ -75,6 +75,7 @@ function topportRow(
   const d = parseTopportBox(box, fallbackEdition);
   return {
     contractAddress: contract.toLowerCase(),
+    name: d.name,
     member: d.member,
     designNumber: d.designNumber,
     edition: d.edition,

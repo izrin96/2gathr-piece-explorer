@@ -16,6 +16,7 @@ export const pieceDesignMeta = pgTable(
   "piece_design_meta",
   {
     contractAddress: citext("contract_address", { length: 42 }).primaryKey(),
+    name: text("name"),
     member: text("member"),
     designNumber: integer("design_number"),
     edition: text("edition").notNull(),
