@@ -45,41 +45,39 @@ export function PieceFilters({ designs }: { designs: Design[] }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <DesignFilterFields
-        members={members}
-        editions={editions}
-        member={search.member}
-        pieceClass={search.class}
-        edition={search.edition}
-        onMemberChange={(v) => set("member", v)}
-        onClassChange={(v) => set("class", v)}
-        onEditionChange={(v) => set("edition", v)}
-        hasActiveFilters={hasActiveFilters}
-        onReset={resetFilters}
-      />
-      <div className="ml-auto">
-        <Select
-          items={SORTS}
-          value={search.sort ?? "newest"}
-          onValueChange={(v) =>
-            set("sort", v === "newest" ? undefined : (v as PieceSearch["sort"]))
-          }
-        >
-          <SelectTrigger className="w-32">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent alignItemWithTrigger={false}>
-            <SelectGroup>
-              {SORTS.map((s) => (
-                <SelectItem key={s.value} value={s.value}>
-                  {s.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+    <div className="flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <DesignFilterFields
+          members={members}
+          editions={editions}
+          member={search.member}
+          pieceClass={search.class}
+          edition={search.edition}
+          onMemberChange={(v) => set("member", v)}
+          onClassChange={(v) => set("class", v)}
+          onEditionChange={(v) => set("edition", v)}
+          hasActiveFilters={hasActiveFilters}
+          onReset={resetFilters}
+        />
       </div>
+      <Select
+        items={SORTS}
+        value={search.sort ?? "newest"}
+        onValueChange={(v) => set("sort", v === "newest" ? undefined : (v as PieceSearch["sort"]))}
+      >
+        <SelectTrigger className="w-36">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent alignItemWithTrigger={false}>
+          <SelectGroup>
+            {SORTS.map((s) => (
+              <SelectItem key={s.value} value={s.value}>
+                {s.label}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
     </div>
   );
 }
