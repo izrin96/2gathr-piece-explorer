@@ -1,4 +1,17 @@
+function isIOS() {
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
 export async function downloadFile(url: string, filename: string) {
+  if (isIOS()) {
+    // iOS Safari ignores the `download` attribute and blocks window.open() once
+    // an await breaks the user-gesture chain, so open synchronously here instead.
+    window.open(url, "_blank", "noopener,noreferrer");
+    return;
+  }
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error(`download failed: ${response.status}`);
