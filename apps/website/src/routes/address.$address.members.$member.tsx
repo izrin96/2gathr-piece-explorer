@@ -2,7 +2,10 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, notFound, useRouter } from "@tanstack/react-router";
 import { ChevronLeftIcon } from "lucide-react";
 
-import { CollectStatusCard } from "@/components/holder/collect-status-card";
+import {
+  COLLECT_STATUS_CARD_FOOTER_HEIGHT,
+  CollectStatusCard,
+} from "@/components/holder/collect-status-card";
 import { PieceGrid } from "@/components/piece/piece-grid";
 import { Progress } from "@/components/ui/progress";
 import { resolveMemberProgress } from "@/lib/member-progress";
@@ -54,6 +57,7 @@ function HolderMemberDetail() {
         </Progress>
       </div>
       <PieceGrid
+        footerHeight={COLLECT_STATUS_CARD_FOOTER_HEIGHT}
         items={progress.slots}
         getKey={(slot) => slot.design.contractAddress}
         renderItem={(slot) => (

@@ -11,12 +11,9 @@ import { SerialTable } from "@/components/piece/serial-table";
 import { Button } from "@/components/ui/button";
 import { LocalTime } from "@/components/ui/local-time";
 import { Separator } from "@/components/ui/separator";
-import { useLoadMoreOnScroll } from "@/hooks/use-load-more-on-scroll";
 import { downloadFile } from "@/lib/download";
 import { mediaFilename, pickMediaSource } from "@/lib/media";
 import { orpc } from "@/orpc/client";
-
-const SERIALS_REVEAL_STEP = 30;
 
 export const Route = createFileRoute("/pieces/$contract")({
   loader: async ({ context, params }) => {
@@ -40,12 +37,6 @@ function PieceDetailPage() {
   const input = { contract };
   const { data: design } = useSuspenseQuery(orpc.pieces.detail.queryOptions({ input }));
   const { data: serials } = useSuspenseQuery(orpc.pieces.serials.queryOptions({ input }));
-  const [revealCount, setRevealCount] = useState(SERIALS_REVEAL_STEP);
-  const hasMore = revealCount < serials.length;
-  const sentinelRef = useLoadMoreOnScroll(
-    () => setRevealCount((c) => Math.min(c + SERIALS_REVEAL_STEP, serials.length)),
-    hasMore,
-  );
   const [downloading, setDownloading] = useState(false);
 
   if (!design) return null; // loader already threw notFound
@@ -119,8 +110,7 @@ function PieceDetailPage() {
       <Separator />
       <section className="space-y-3">
         <h2 className="text-lg font-medium">Serials ({serials.length})</h2>
-        <SerialTable serials={serials.slice(0, revealCount)} />
-        {hasMore && <div ref={sentinelRef} />}
+        <SerialTable serials={serials} />
       </section>
     </div>
   );

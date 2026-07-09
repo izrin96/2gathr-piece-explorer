@@ -1,7 +1,10 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { OwnedDesignCard } from "@/components/holder/owned-design-card";
+import {
+  OWNED_DESIGN_CARD_FOOTER_HEIGHT,
+  OwnedDesignCard,
+} from "@/components/holder/owned-design-card";
 import { DesignFilterFields } from "@/components/piece/filter-controls";
 import { PieceGrid } from "@/components/piece/piece-grid";
 import { designMatches, filterOptions, ownedPieceSearchSchema } from "@/lib/filters";
@@ -69,6 +72,7 @@ function HolderPiecesTab() {
         <p className="text-muted-foreground text-sm">No pieces match these filters.</p>
       ) : (
         <PieceGrid
+          footerHeight={OWNED_DESIGN_CARD_FOOTER_HEIGHT}
           items={visible}
           getKey={(owned) => owned.design.contractAddress}
           renderItem={(owned) => <OwnedDesignCard owned={owned} />}

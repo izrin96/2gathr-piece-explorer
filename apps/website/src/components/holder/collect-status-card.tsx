@@ -1,8 +1,13 @@
 import { Link } from "@tanstack/react-router";
 
+import { CARD_BORDER_WIDTH } from "@/components/piece/piece-grid";
 import { PieceMedia } from "@/components/piece/piece-media";
 import type { Design } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+// p-2 (16) + name row text-xs (16) + border. Row is truncate — fixed at 1
+// line — so this is exact, not a guess. Feeds PieceGrid's row-height estimate.
+export const COLLECT_STATUS_CARD_FOOTER_HEIGHT = 16 + 16 + CARD_BORDER_WIDTH;
 
 // One design, collected or not. This is a public explorer and isHidden designs are already
 // unfiltered and fully visible elsewhere (`/`, `/pieces/$contract`), so a "?" mystery treatment

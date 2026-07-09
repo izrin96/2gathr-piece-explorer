@@ -1,8 +1,15 @@
 import { Link } from "@tanstack/react-router";
 
 import { ClassBadge } from "@/components/piece/class-badge";
+import { CARD_BORDER_WIDTH } from "@/components/piece/piece-grid";
 import { PieceMedia } from "@/components/piece/piece-media";
 import type { OwnedDesign } from "@/lib/types";
+
+// p-3 (24) + name row text-sm (20) + edition row text-xs (16) + serials row
+// text-xs (16) + 2x space-y-1 gap (8) + border. All 3 rows are truncate —
+// fixed at 3 lines — so this is exact, not a guess. Feeds PieceGrid's
+// row-height estimate.
+export const OWNED_DESIGN_CARD_FOOTER_HEIGHT = 24 + 20 + 16 + 16 + 8 + CARD_BORDER_WIDTH;
 
 export function OwnedDesignCard({ owned }: { owned: OwnedDesign }) {
   const { design, serials } = owned;
