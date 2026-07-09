@@ -1,7 +1,7 @@
 import { isAddress } from "@repo/lib";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, notFound } from "@tanstack/react-router";
-import { CopyIcon } from "lucide-react";
+import { CopyIcon, DownloadIcon, Loader2Icon } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { LocalTime } from "@/components/ui/local-time";
 import { Separator } from "@/components/ui/separator";
 import { useLoadMoreOnScroll } from "@/hooks/use-load-more-on-scroll";
+import { downloadFile } from "@/lib/download";
+import { mediaFilename, pickMediaSource } from "@/lib/media";
 import { orpc } from "@/orpc/client";
 
 const SERIALS_REVEAL_STEP = 30;
@@ -44,13 +46,35 @@ function PieceDetailPage() {
     () => setRevealCount((c) => Math.min(c + SERIALS_REVEAL_STEP, serials.length)),
     hasMore,
   );
+  const [downloading, setDownloading] = useState(false);
 
   if (!design) return null; // loader already threw notFound
+
+  const media = pickMediaSource(design);
+  const filename = mediaFilename(design.name, media);
 
   return (
     <div className="space-y-8">
       <div className="grid gap-8 md:grid-cols-[minmax(0,20rem)_1fr]">
-        <PieceMedia design={design} className="rounded-lg border" />
+        <div className="relative">
+          <PieceMedia design={design} className="rounded-lg border" />
+          {media.kind !== "none" && filename && (
+            <Button
+              variant="secondary"
+              size="icon-sm"
+              className="absolute top-2 right-2"
+              disabled={downloading}
+              aria-label="Download media"
+              onClick={async () => {
+                setDownloading(true);
+                await downloadFile(media.src, filename);
+                setDownloading(false);
+              }}
+            >
+              {downloading ? <Loader2Icon className="animate-spin" /> : <DownloadIcon />}
+            </Button>
+          )}
+        </div>
         <div className="space-y-4">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-semibold">{design.name}</h1>

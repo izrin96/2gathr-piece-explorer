@@ -13,3 +13,11 @@ export function pickMediaSource(d: {
   if (d.imageUrl) return { kind: "image", src: d.imageUrl };
   return { kind: "none" };
 }
+
+export function mediaFilename(name: string, media: MediaSource): string | null {
+  if (media.kind === "none") return null;
+  const urlExt = media.src.replace(/\?.*$/, "").split(".").pop();
+  const ext = urlExt && urlExt.length <= 4 ? urlExt : media.kind === "video" ? "mp4" : "jpg";
+  const safeName = name.replace(/[^a-z0-9]+/gi, "-").replace(/^-+|-+$/g, "") || "piece";
+  return `${safeName}.${ext}`;
+}
