@@ -127,11 +127,15 @@ function findPairedRubyIndex(
 // meta-less-collection exclusion as the grid. Direction is relative to
 // `address`; a self-transfer (from === to === address) counts as "in".
 // Returns the complete sorted list — pagination happens in the oRPC procedure.
+// `pairRuby=false` (the explicit `?type=ruby` view) skips the fold below so a
+// gacha-cost Ruby transfer shows as its own row instead of disappearing into
+// the piece's `priceWei`.
 export function mergeActivity(
   address: string,
   pieceTx: PieceTransferRow[],
   rubyTx: RubyTransferRow[],
   designByAddress: Map<string, Design>,
+  pairRuby = true,
 ): HolderActivityItem[] {
   // blockNumber/logIndex break timestamp ties but aren't part of the public
   // item shape, so they're carried alongside the item only until the sort.
@@ -143,7 +147,9 @@ export function mergeActivity(
     // check below can `continue` — otherwise an excluded mint's payment is
     // left behind to render as a dangling standalone "Sent RUBY" row.
     const direction = t.to === address ? "in" : "out";
-    const pairedRubyIndex = findPairedRubyIndex(address, t, direction, rubyTx, usedRubyIds);
+    const pairedRubyIndex = pairRuby
+      ? findPairedRubyIndex(address, t, direction, rubyTx, usedRubyIds)
+      : -1;
     const pairedRuby = pairedRubyIndex === -1 ? null : rubyTx[pairedRubyIndex];
     if (pairedRuby) usedRubyIds.add(pairedRuby.id);
 

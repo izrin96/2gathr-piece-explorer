@@ -170,7 +170,10 @@ export const holdersRouter = {
     );
 
     const filtered = filterActivityByDesign(
-      filterActivity(mergeActivity(input.address, pieceTx, rubyTx, designByAddress), input.type),
+      filterActivity(
+        mergeActivity(input.address, pieceTx, rubyTx, designByAddress, input.type !== "ruby"),
+        input.type,
+      ),
       designByAddress,
       { member: input.member, class: input.class, edition: input.edition },
     );
