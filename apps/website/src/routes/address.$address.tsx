@@ -43,7 +43,10 @@ function HolderLayout() {
     : matchRoute({ to: "/address/$address/book" }) ||
         matchRoute({ to: "/address/$address/book/$bookId" })
       ? "book"
-      : "pieces";
+      : matchRoute({ to: "/address/$address/members" }) ||
+          matchRoute({ to: "/address/$address/members/$member" })
+        ? "members"
+        : "pieces";
 
   return (
     <div className="space-y-8">
@@ -73,7 +76,9 @@ function HolderLayout() {
                 ? "/address/$address/activity"
                 : v === "book"
                   ? "/address/$address/book"
-                  : "/address/$address",
+                  : v === "members"
+                    ? "/address/$address/members"
+                    : "/address/$address",
             params: { address },
             resetScroll: false,
           })
@@ -83,6 +88,7 @@ function HolderLayout() {
           <TabsTrigger value="pieces">Pieces</TabsTrigger>
           <TabsTrigger value="activity">Activity</TabsTrigger>
           <TabsTrigger value="book">Book</TabsTrigger>
+          <TabsTrigger value="members">Progress</TabsTrigger>
         </TabsList>
       </Tabs>
 

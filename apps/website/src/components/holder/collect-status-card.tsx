@@ -1,16 +1,19 @@
 import { Link } from "@tanstack/react-router";
 
 import { PieceMedia } from "@/components/piece/piece-media";
-import type { BookSlot } from "@/lib/piece-books";
+import type { Design } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-// One book slot, regular or hidden bonus — same treatment for both. This is a
-// public explorer and isHidden designs are already unfiltered and fully
-// visible elsewhere (`/`, `/pieces/$contract`), so a "?" mystery card here
-// would only be inconsistent, not actually private.
-export function PieceBookSlotCard({ slot }: { slot: BookSlot }) {
-  const { design, isCollected } = slot;
-
+// One design, collected or not. This is a public explorer and isHidden designs are already
+// unfiltered and fully visible elsewhere (`/`, `/pieces/$contract`), so a "?" mystery treatment
+// for an uncollected design would only be inconsistent, not actually private.
+export function CollectStatusCard({
+  design,
+  isCollected,
+}: {
+  design: Design;
+  isCollected: boolean;
+}) {
   const content = (
     <div
       className={cn(

@@ -2,7 +2,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ChevronLeftIcon } from "lucide-react";
 
-import { PieceBookSlotCard } from "@/components/holder/piece-book-slot-card";
+import { CollectStatusCard } from "@/components/holder/collect-status-card";
 import { Progress } from "@/components/ui/progress";
 import { resolveAllBooks } from "@/lib/piece-books";
 import { orpc } from "@/orpc/client";
@@ -55,7 +55,11 @@ function HolderBookDetail() {
       </div>
       <div className="grid grid-cols-3 gap-3 sm:max-w-lg">
         {book.slots.map((slot) => (
-          <PieceBookSlotCard key={slot.design.contractAddress} slot={slot} />
+          <CollectStatusCard
+            key={slot.design.contractAddress}
+            design={slot.design}
+            isCollected={slot.isCollected}
+          />
         ))}
       </div>
       {book.hiddenSlot && (
@@ -64,7 +68,10 @@ function HolderBookDetail() {
             Hidden Piece — complete the book to unlock
           </h2>
           <div className="max-w-40">
-            <PieceBookSlotCard slot={book.hiddenSlot} />
+            <CollectStatusCard
+              design={book.hiddenSlot.design}
+              isCollected={book.hiddenSlot.isCollected}
+            />
           </div>
         </div>
       )}
