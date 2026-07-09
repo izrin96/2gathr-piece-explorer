@@ -1,25 +1,11 @@
 import { getRouteApi } from "@tanstack/react-router";
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { filterOptions, type PieceSearch } from "@/lib/filters";
 import type { Design } from "@/lib/types";
 
-import { DesignFilterFields } from "./filter-controls";
+import { DesignFilterFields, SortSelect } from "./filter-controls";
 
 const route = getRouteApi("/");
-
-const SORTS = [
-  { value: "newest", label: "Newest" },
-  { value: "oldest", label: "Oldest" },
-  { value: "name", label: "Name" },
-] as const;
 
 export function PieceFilters({ designs }: { designs: Design[] }) {
   const search = route.useSearch();
@@ -60,24 +46,7 @@ export function PieceFilters({ designs }: { designs: Design[] }) {
           onReset={resetFilters}
         />
       </div>
-      <Select
-        items={SORTS}
-        value={search.sort ?? "newest"}
-        onValueChange={(v) => set("sort", v === "newest" ? undefined : (v as PieceSearch["sort"]))}
-      >
-        <SelectTrigger className="w-36">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent alignItemWithTrigger={false}>
-          <SelectGroup>
-            {SORTS.map((s) => (
-              <SelectItem key={s.value} value={s.value}>
-                {s.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      <SortSelect value={search.sort} onChange={(v) => set("sort", v)} />
     </div>
   );
 }

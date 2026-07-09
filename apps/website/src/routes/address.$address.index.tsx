@@ -5,13 +5,13 @@ import {
   OWNED_DESIGN_CARD_FOOTER_HEIGHT,
   OwnedDesignCard,
 } from "@/components/holder/owned-design-card";
-import { DesignFilterFields } from "@/components/piece/filter-controls";
+import { DesignFilterFields, SortSelect } from "@/components/piece/filter-controls";
 import { PieceGrid } from "@/components/piece/piece-grid";
-import { designMatches, filterOptions, ownedPieceSearchSchema } from "@/lib/filters";
+import { designMatches, filterOptions, pieceSearchSchema, sortDesigns } from "@/lib/filters";
 import { orpc } from "@/orpc/client";
 
 export const Route = createFileRoute("/address/$address/")({
-  validateSearch: ownedPieceSearchSchema,
+  validateSearch: pieceSearchSchema,
   component: HolderPiecesTab,
 });
 
@@ -26,7 +26,12 @@ function HolderPiecesTab() {
   if (!summary) return null; // parent loader already threw notFound
 
   const { members, editions } = filterOptions(summary.ownedDesigns.map((o) => o.design));
-  const visible = summary.ownedDesigns.filter((o) => designMatches(o.design, search));
+  const filtered = summary.ownedDesigns.filter((o) => designMatches(o.design, search));
+  const byAddress = new Map(filtered.map((o) => [o.design.contractAddress, o]));
+  const visible = sortDesigns(
+    filtered.map((o) => o.design),
+    search.sort,
+  ).map((d) => byAddress.get(d.contractAddress)!);
   const hasActiveFilters = search.member != null || search.class != null || search.edition != null;
 
   function set<K extends keyof typeof search>(key: K, value: (typeof search)[K]) {
@@ -48,19 +53,22 @@ function HolderPiecesTab() {
   return (
     <section className="space-y-3">
       {summary.ownedDesigns.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2">
-          <DesignFilterFields
-            members={members}
-            editions={editions}
-            member={search.member}
-            pieceClass={search.class}
-            edition={search.edition}
-            onMemberChange={(v) => set("member", v)}
-            onClassChange={(v) => set("class", v)}
-            onEditionChange={(v) => set("edition", v)}
-            hasActiveFilters={hasActiveFilters}
-            onReset={resetFilters}
-          />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <DesignFilterFields
+              members={members}
+              editions={editions}
+              member={search.member}
+              pieceClass={search.class}
+              edition={search.edition}
+              onMemberChange={(v) => set("member", v)}
+              onClassChange={(v) => set("class", v)}
+              onEditionChange={(v) => set("edition", v)}
+              hasActiveFilters={hasActiveFilters}
+              onReset={resetFilters}
+            />
+          </div>
+          <SortSelect value={search.sort} onChange={(v) => set("sort", v)} />
         </div>
       )}
       <p className="text-muted-foreground text-sm">

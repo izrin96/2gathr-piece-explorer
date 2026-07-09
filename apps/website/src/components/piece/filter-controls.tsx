@@ -9,9 +9,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { PieceSearch } from "@/lib/filters";
 import type { PieceClass } from "@/lib/types";
 
 const CLASSES = ["S", "A", "B"] as const;
+const SORTS = [
+  { value: "newest", label: "Newest" },
+  { value: "oldest", label: "Oldest" },
+  { value: "member", label: "Member" },
+] as const;
 
 export function DesignFilterFields({
   members,
@@ -70,7 +76,36 @@ export function DesignFilterFields({
   );
 }
 
-function FilterSelect({
+export function SortSelect({
+  value,
+  onChange,
+}: {
+  value: PieceSearch["sort"];
+  onChange: (value: PieceSearch["sort"] | undefined) => void;
+}) {
+  return (
+    <Select
+      items={SORTS}
+      value={value ?? "newest"}
+      onValueChange={(v) => onChange(v === "newest" ? undefined : (v as PieceSearch["sort"]))}
+    >
+      <SelectTrigger className="w-36">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent alignItemWithTrigger={false}>
+        <SelectGroup>
+          {SORTS.map((s) => (
+            <SelectItem key={s.value} value={s.value}>
+              {s.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+}
+
+export function FilterSelect({
   placeholder,
   allLabel,
   value,

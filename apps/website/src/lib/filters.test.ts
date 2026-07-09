@@ -85,9 +85,10 @@ describe("sortDesigns", () => {
     ]);
   });
 
-  it("name sorts alphabetically", () => {
-    const sorted = sortDesigns([bome, arin], "name");
-    expect(sorted.map((d) => d.name)).toEqual(["Arin #002", "Bome #001"]);
+  it("member sorts alphabetically, null member last", () => {
+    const noMember = design({ name: "Zzz", member: null });
+    const sorted = sortDesigns([bome, arin, noMember], "member");
+    expect(sorted.map((d) => d.name)).toEqual(["Arin #002", "Bome #001", "Zzz"]);
   });
 
   it("defaults to newest when sort is undefined", () => {

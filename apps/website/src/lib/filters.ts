@@ -18,7 +18,7 @@ export type DesignFilterSearch = z.infer<typeof ownedPieceSearchSchema>;
 // All params optional so unfiltered/default URLs stay clean (`/`, not `/?sort=newest`).
 export const pieceSearchSchema = z.object({
   ...designFilterSchemaFields,
-  sort: z.enum(["newest", "oldest", "name"]).optional().catch(undefined),
+  sort: z.enum(["newest", "oldest", "member"]).optional().catch(undefined),
 });
 
 export type PieceSearch = z.infer<typeof pieceSearchSchema>;
@@ -49,8 +49,13 @@ export function sortDesigns(designs: Design[], sort: PieceSearch["sort"]): Desig
         return (b.releaseDatetime ?? "").localeCompare(a.releaseDatetime ?? "");
       case "oldest":
         return (a.releaseDatetime ?? "").localeCompare(b.releaseDatetime ?? "");
-      case "name":
-        return a.name.localeCompare(b.name);
+      case "member": {
+        if (a.member == null || b.member == null) {
+          if (a.member == null && b.member == null) return a.name.localeCompare(b.name);
+          return a.member == null ? 1 : -1;
+        }
+        return a.member.localeCompare(b.member) || a.name.localeCompare(b.name);
+      }
     }
   });
 

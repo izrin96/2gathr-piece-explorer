@@ -1,4 +1,10 @@
+import { z } from "zod";
+
+import { designFilterSchemaFields } from "./filters";
 import type { Design } from "./types";
+
+export const bookSearchSchema = z.object({ member: designFilterSchemaFields.member });
+export type BookSearch = z.infer<typeof bookSearchSchema>;
 
 // Fetched from `orpc.books.list` — the worker's sync-piece-books job caches these straight from
 // the 2GATHR app API (real slot contract addresses, not a guessed design-number pattern).
@@ -55,4 +61,12 @@ export function resolveAllBooks(
       percent: slots.length === 0 ? 0 : Math.round((collected / slots.length) * 100),
     };
   });
+}
+
+export function filterBooksByMember(
+  books: ResolvedBook[],
+  member: string | undefined,
+): ResolvedBook[] {
+  if (member == null) return books;
+  return books.filter((book) => book.slots.some((s) => s.design.member === member));
 }
