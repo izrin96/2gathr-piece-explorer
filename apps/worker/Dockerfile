@@ -1,8 +1,14 @@
+# syntax=docker/dockerfile:1
 # Build from the repo root: docker build -f apps/worker/Dockerfile .
 # The worker runs TypeScript directly via tsx: its workspace deps
 # (@repo/db, @repo/lib, @repo/2gathr) export raw .ts sources.
 FROM node:24-slim
-RUN npm install -g pnpm@11.10.0
+# Cache mounts keep pnpm's download/content-addressable store out of the image
+# layer entirely (it was ~275MB of dead weight — never needed at runtime,
+# node_modules already holds everything via hardlinks) while still speeding
+# up rebuilds across `docker build` invocations on the same host.
+RUN --mount=type=cache,target=/root/.npm \
+  npm install -g pnpm@11.10.0
 WORKDIR /repo
 ENV NODE_ENV=production
 
@@ -15,7 +21,9 @@ COPY packages/lint/package.json packages/lint/
 COPY packages/lib/package.json packages/lib/
 COPY packages/db/package.json packages/db/
 COPY packages/2gathr/package.json packages/2gathr/
-RUN pnpm install --prod --frozen-lockfile --filter worker...
+RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
+  --mount=type=cache,target=/root/.cache/pnpm \
+  pnpm install --prod --frozen-lockfile --filter worker...
 
 COPY packages/tsconfig packages/tsconfig
 COPY packages/lib packages/lib
