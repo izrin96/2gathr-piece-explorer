@@ -53,6 +53,51 @@ export const addressProfile = pgTable("address_profile", {
   updatedAt: timestamp("updated_at", { mode: "string", withTimezone: true }),
 });
 
+// Live session credential for a bearer-authed third-party API (e.g. the 2GATHR app backend),
+// refreshed on a schedule by the worker. Single row per `service`. Unlike the rest of this DB
+// (derived/cache data), this holds real account credentials — DATABASE_URL access means account
+// access too. *ExpiresAt are observability-only (nothing reads them in control flow); they let a
+// human check db:studio for remaining runway before a manual re-seed would ever be needed.
+export const appCredential = pgTable("app_credential", {
+  service: text("service").primaryKey(),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token").notNull(),
+  accessExpiresAt: timestamp("access_expires_at", { mode: "string", withTimezone: true }).notNull(),
+  refreshExpiresAt: timestamp("refresh_expires_at", {
+    mode: "string",
+    withTimezone: true,
+  }).notNull(),
+  updatedAt: timestamp("updated_at", { mode: "string", withTimezone: true }).notNull(),
+});
+
+// Cached 2GATHR Piece Book definitions (fetched + resolved by the worker's sync-piece-books
+// job from the bearer-authed app API — see app_credential above). "known" for that job's
+// new-book detection is just "already has a row here", not a hardcoded id list.
+export const pieceBook = pgTable("piece_book", {
+  id: text("id").primaryKey(), // 2gathr's own cuid
+  title: text("title").notNull(),
+  rewardType: text("reward_type"),
+  totalSlots: integer("total_slots").notNull(),
+  startAt: timestamp("start_at", { mode: "string", withTimezone: true }),
+  updatedAt: timestamp("updated_at", { mode: "string", withTimezone: true }).notNull(),
+});
+
+// One row per required slot plus one for the hidden reward slot (isHiddenReward=true,
+// displayOrder=null). contractAddress is resolved by the worker at cache-write time (the
+// hidden slot's collectionId is a TopPort id, not a contract address — joined against our own
+// piece_design_meta.topport_id) so nothing downstream needs to know about TopPort ids.
+export const pieceBookSlot = pgTable(
+  "piece_book_slot",
+  {
+    id: text("id").primaryKey(), // 2gathr's slotId / rewardSlotId
+    bookId: text("book_id").notNull(),
+    contractAddress: citext("contract_address", { length: 42 }).notNull(),
+    displayOrder: integer("display_order"),
+    isHiddenReward: boolean("is_hidden_reward").notNull(),
+  },
+  (t) => [index("piece_book_slot_book_id_idx").on(t.bookId)],
+);
+
 // Generic rollup cache (holder counts, class distribution, etc.), keyed by a string key.
 export const rollupStat = pgTable(
   "rollup_stat",

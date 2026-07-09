@@ -4,13 +4,16 @@ import { ChevronLeftIcon } from "lucide-react";
 
 import { PieceBookSlotCard } from "@/components/holder/piece-book-slot-card";
 import { Progress } from "@/components/ui/progress";
-import { PIECE_BOOKS, resolveAllBooks } from "@/lib/piece-books";
+import { resolveAllBooks } from "@/lib/piece-books";
 import { orpc } from "@/orpc/client";
 
 export const Route = createFileRoute("/address/$address/book/$bookId")({
   loader: async ({ context, params }) => {
-    if (!PIECE_BOOKS.some((b) => b.id === params.bookId)) throw notFound();
-    await context.queryClient.ensureQueryData(orpc.pieces.list.queryOptions());
+    const [, bookDefinitions] = await Promise.all([
+      context.queryClient.ensureQueryData(orpc.pieces.list.queryOptions()),
+      context.queryClient.ensureQueryData(orpc.books.list.queryOptions()),
+    ]);
+    if (!bookDefinitions.some((b) => b.id === params.bookId)) throw notFound();
   },
   component: HolderBookDetail,
 });
@@ -18,6 +21,7 @@ export const Route = createFileRoute("/address/$address/book/$bookId")({
 function HolderBookDetail() {
   const { address, bookId } = Route.useParams();
   const { data: designs } = useSuspenseQuery(orpc.pieces.list.queryOptions());
+  const { data: bookDefinitions } = useSuspenseQuery(orpc.books.list.queryOptions());
   const { data: summary } = useSuspenseQuery(
     orpc.holders.summary.queryOptions({ input: { address } }),
   );
@@ -25,7 +29,9 @@ function HolderBookDetail() {
   if (!summary) return null; // parent loader already threw notFound
 
   const ownedAddresses = new Set(summary.ownedDesigns.map((o) => o.design.contractAddress));
-  const book = resolveAllBooks(designs, ownedAddresses).find((b) => b.definition.id === bookId);
+  const book = resolveAllBooks(bookDefinitions, designs, ownedAddresses).find(
+    (b) => b.definition.id === bookId,
+  );
 
   if (!book) return null; // route loader already threw notFound for unknown ids
 

@@ -95,8 +95,10 @@ services:
       - DATABASE_URL=postgres://postgres:${DB_PASSWORD}@pgbouncer:5432/main
       - INDEXER_DATABASE_URL=postgres://postgres:${INDEXER_DB_PASSWORD}@pgbouncer-indexer:5432/indexer
 
-  # Cron-scheduled TopPort enrichment + rollup recompute. No exposed port.
-  # Also applies pending app-DB migrations on start (see MIGRATE_DATABASE_URL).
+  # Cron-scheduled TopPort enrichment + rollup recompute, plus hourly 2GATHR app-session
+  # refresh + daily new-Piece-Book detection. No exposed port. Also applies pending app-DB
+  # migrations on start (see MIGRATE_DATABASE_URL). The 2GATHR credential needs a one-time
+  # manual seed after first boot — see IAND_BASE_URL's comment in .env.prod.example.
   worker:
     image: ghcr.io/izrin96/2gathr-piece-explorer-worker:latest
     platform: linux/amd64
@@ -115,6 +117,7 @@ services:
       - MIGRATE_DATABASE_URL=postgres://postgres:${DB_PASSWORD}@postgres:5432/main
       - INDEXER_DATABASE_URL=postgres://postgres:${INDEXER_DB_PASSWORD}@pgbouncer-indexer:5432/indexer
       - TOPPORT_BASE_URL=${TOPPORT_BASE_URL:-https://api.topport.io}
+      - IAND_BASE_URL=${IAND_BASE_URL:-https://api.iand-dev.com}
 
   # Subsquid processor: applies pending migrations then indexes Ruby + Piece
   # Transfer events from Titan. Connects DIRECTLY to postgres-indexer (never

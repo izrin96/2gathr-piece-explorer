@@ -55,13 +55,13 @@ apps/       indexer (Subsquid, built) · worker (built) · website (TanStack Sta
 packages/   tsconfig · lint · lib · db · 2gathr
 ```
 
-| Package          | Responsibility              | Key exports                                                                             |
-| ---------------- | --------------------------- | --------------------------------------------------------------------------------------- |
-| `@repo/tsconfig` | Shared TS configs           | `tsconfig.{base,node,react}.json`                                                       |
-| `@repo/lint`     | Shared oxlint config        | `./oxlint.config`                                                                       |
-| `@repo/lib`      | Pure utils + domain types   | `normalizeAddress`, `isAddress`, `ZERO_ADDRESS`, `parsePieceName`, `normalizeMember`    |
-| `@repo/db`       | Drizzle clients + schema    | `db` (app), `indexer` (read-only), `indexerSchema` (pulled piece/ruby tables), `citext` |
-| `@repo/2gathr`   | IPFS/TopPort types + parser | `pieceMetadataSchema`, `parsePieceMetadata`, `createHttpClient`                         |
+| Package          | Responsibility                                 | Key exports                                                                                                               |
+| ---------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `@repo/tsconfig` | Shared TS configs                              | `tsconfig.{base,node,react}.json`                                                                                         |
+| `@repo/lint`     | Shared oxlint config                           | `./oxlint.config`                                                                                                         |
+| `@repo/lib`      | Pure utils + domain types                      | `normalizeAddress`, `isAddress`, `ZERO_ADDRESS`, `parsePieceName`, `normalizeMember`                                      |
+| `@repo/db`       | Drizzle clients + schema                       | `db` (app), `indexer` (read-only), `indexerSchema` (pulled piece/ruby tables), `citext`                                   |
+| `@repo/2gathr`   | IPFS/TopPort/iand-dev types + parser + clients | `pieceMetadataSchema`, `parsePieceMetadata`, `createHttpClient`, `createIandClient`, `refreshIandToken`, `listPieceBooks` |
 
 `apps/*` are created per phase (Plan 2 = indexer ✓, Plan 3 = worker ✓, then website).
 
@@ -83,6 +83,8 @@ packages/   tsconfig · lint · lib · db · 2gathr
 ## Status
 
 Phase 0 (foundation) + **Plan 2 (Subsquid indexer)** + **Plan 3 (enrichment worker)** complete and merged. `apps/indexer` wildcard-indexes Ruby + Piece `Transfer`s on Titan into the `indexer` DB; `@repo/db/src/indexer` is the read-only Drizzle model. `apps/worker` (cron-scheduled, `croner`) enriches `piece_design_meta` from the TopPort public catalog (class/edition/member/media, hourly stale-design refresh) and recomputes `rollup_stat` rollups (holder counts, class distribution, Ruby balances); media mirroring and an IPFS/RPC fallback are deferred.
+
+**2GATHR app credential + Piece Book cache**: `apps/worker` also runs `refresh-iand-credential` (hourly) and `sync-piece-books` (daily). The 2GATHR app backend (`api.iand-dev.com`) is bearer-authed and user-scoped (see `docs/superpowers/research/2gathr-api-findings.md`), but its Piece Book _definitions_ are global/identical for every account — so rather than treating this as per-user data we don't have, the refresh job keeps one seeded session alive indefinitely (`app_credential` table, single row; `POST /v2/auth/refresh` rotates a **6-day sliding-window** refresh token — corrected from the findings doc's original "7 days", confirmed live) and `sync-piece-books` fetches + caches the real book definitions (`piece_book` / `piece_book_slot` tables — real slot `contractAddress`es straight from `/v1/piece-book/{id}`, not a guessed design-number pattern; a hidden reward slot's `collectionId` is a TopPort id, resolved to a contract address via our own `piece_design_meta.topport_id`). "Known" is just "already has a `piece_book` row" (`apps/worker/src/piece-books/diff.ts`'s `findNewBooks`) — a new book gets fetched and cached automatically, no code change needed. The website's `orpc.books.list` (`apps/website/src/orpc/routers/books.ts`) reads this cache directly; `apps/website/src/lib/piece-books.ts`'s `resolveAllBooks` just joins cached slot addresses against owned designs, no member/edition guessing. Bootstrap is manual and rare: `pnpm --filter worker run seed-credential` needs a fresh access/refresh token pair captured from one interactive app login (e.g. via mitmproxy on `gathr://auth/callback?access_token=...&refresh_token=...`) — only ever needed again if the worker is down 6+ consecutive days.
 
 **Website pieces MVP** (spec `docs/superpowers/specs/2026-07-08-website-pieces-mvp-design.md`):
 `apps/website` (TanStack Start SSR + stock shadcn Base UI + oRPC/TanStack Query) serves `/`
