@@ -5,7 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import type { ResolvedBook } from "@/lib/piece-books";
 
 export function PieceBookCard({ address, book }: { address: string; book: ResolvedBook }) {
-  const cover = book.slots[0]?.design;
+  const cover = book.hiddenSlot?.design ?? book.slots[0]?.design;
 
   return (
     <Link
