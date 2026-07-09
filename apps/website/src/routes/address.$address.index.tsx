@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { OwnedDesignCard } from "@/components/holder/owned-design-card";
 import { DesignFilterFields } from "@/components/piece/filter-controls";
+import { PieceGrid } from "@/components/piece/piece-grid";
 import { designMatches, filterOptions, ownedPieceSearchSchema } from "@/lib/filters";
 import { orpc } from "@/orpc/client";
 
@@ -67,11 +68,11 @@ function HolderPiecesTab() {
       ) : visible.length === 0 ? (
         <p className="text-muted-foreground text-sm">No pieces match these filters.</p>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {visible.map((owned) => (
-            <OwnedDesignCard key={owned.design.contractAddress} owned={owned} />
-          ))}
-        </div>
+        <PieceGrid
+          items={visible}
+          getKey={(owned) => owned.design.contractAddress}
+          renderItem={(owned) => <OwnedDesignCard owned={owned} />}
+        />
       )}
     </section>
   );

@@ -10,7 +10,7 @@ export function PieceCard({ design }: { design: Design }) {
     <Link
       to="/pieces/$contract"
       params={{ contract: design.contractAddress }}
-      className="bg-card group hover:border-foreground/25 overflow-hidden rounded-lg border transition-colors"
+      className="bg-card group hover:border-foreground/25 block overflow-hidden rounded-lg border transition-colors"
     >
       <PieceMedia design={design} />
       <div className="space-y-1 p-3">
